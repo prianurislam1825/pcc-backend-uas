@@ -96,6 +96,7 @@ func main() {
 
 	// route tanpa middleware (PUBLIC)
 	r.POST("/login", authMiddleware.LoginHandler)
+	r.POST("/register", controllers.UserTambah) // Route rahasia untuk buat akun pertama
 	r.POST("/programstudi", fungsi.BacaDataProdi)
 
 	// route group dengan middleware (PROTECTED - Memerlukan JWT)
