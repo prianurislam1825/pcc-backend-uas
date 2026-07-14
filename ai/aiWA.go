@@ -2,6 +2,7 @@ package ai
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/openai/openai-go"
@@ -27,7 +28,20 @@ func InitAi() {
 }
 
 func TanyaAi(userID string, userInput string) string {
-	// Karena di Railway tidak ada server AI lokal yang jalan di port 8080,
-	// kita beri respons dummy (pura-pura) agar tidak error saat didemo.
-	return "Halo! Saya adalah FikomBot (Bot AI Simulasi). \nSaat ini koneksi ke engine AI pusat sedang dinonaktifkan untuk demo server cloud.\n\nNamun, pastikan kamu mencoba fitur integrasi *Google Drive* kami yang berjalan 100% sempurna di cloud!"
+	input := strings.ToLower(userInput)
+
+	if strings.Contains(input, "siapa") {
+		return "Halo! Saya adalah FikomBot, asisten virtual resmi Fakultas Ilmu Komputer UDB Surakarta. Ada yang bisa saya bantu terkait informasi akademik?"
+	} else if strings.Contains(input, "halo") || strings.Contains(input, "hai") {
+		return "Halo juga! Selamat datang di layanan FikomBot. Silakan tanyakan apa saja."
+	} else if strings.Contains(input, "bantu") {
+		return "Tentu! Saya bisa membantu kamu menjawab pertanyaan seputar jadwal kuliah, KRS, atau informasi pendaftaran. Apa yang ingin kamu tanyakan?"
+	} else if strings.Contains(input, "kuliah") {
+		return "Untuk informasi perkuliahan Fakultas Ilmu Komputer UDB, kamu bisa mengecek jadwal terupdate di website resmi kampus atau menghubungi BAAK."
+	} else if strings.Contains(input, "terima kasih") || strings.Contains(input, "makasih") {
+		return "Sama-sama! Senang bisa membantu. Jangan ragu untuk bertanya lagi jika butuh bantuan."
+	}
+
+	// Default respon jika keyword tidak ada
+	return "Maaf, saya tidak mengerti pertanyaanmu. Sebagai asisten demo FikomBot, saya hanya dapat merespons beberapa pertanyaan umum saat ini."
 }
