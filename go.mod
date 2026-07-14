@@ -1,6 +1,6 @@
 module main
 
-go 1.26.1
+go 1.23.0
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
