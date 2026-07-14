@@ -1,0 +1,16 @@
+# Environment Variables - JANGAN DI UPLOAD KE GITHUB
+.env
+
+# Database SQLite WhatsApp Session
+examplestore.db
+*.db
+
+# Binary hasil build
+server
+*.exe
+
+# File zip
+*.zip
+
+# Fly.io (opsional, bisa di-include jika mau)
+# fly.toml
