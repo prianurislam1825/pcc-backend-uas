@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"context"
 	"fmt"
 	"sync"
 
@@ -28,45 +27,7 @@ func InitAi() {
 }
 
 func TanyaAi(userID string, userInput string) string {
-	if !aiReady {
-		return "Mohon maaf, AI belum diinisialisasi."
-	}
-
-	ctx := context.Background()
-	instruksiSistem := "Anda adalah FikomBot, asisten virtual resmi Fakultas Ilmu Komputer\nUDB Surakarta"
-
-	mu.Lock()
-	chatHistory := userHistories[userID]
-	mu.Unlock()
-
-	currentPayload := make([]openai.ChatCompletionMessageParamUnion, 0, len(chatHistory)+2)
-	currentPayload = append(currentPayload, openai.SystemMessage(instruksiSistem))
-	currentPayload = append(currentPayload, chatHistory...)
-	currentPayload = append(currentPayload, openai.UserMessage(userInput))
-
-	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-		Model:    openai.ChatModel("diisi-saksake"),
-		Messages: currentPayload,
-	})
-	if err != nil {
-		return "Mohon maaf, terjadi gangguan saat memproses jawaban."
-	}
-
-	jawabanAi := "Mohon maaf, AI tidak memberikan respon"
-	if len(resp.Choices) > 0 {
-		jawabanAi = resp.Choices[0].Message.Content
-	}
-
-	mu.Lock()
-	if len(userHistories[userID]) > 10 {
-		userHistories[userID] = userHistories[userID][2:]
-	}
-	userHistories[userID] = append(
-		userHistories[userID],
-		openai.UserMessage(userInput),
-		openai.AssistantMessage(jawabanAi),
-	)
-	mu.Unlock()
-
-	return jawabanAi
+	// Karena di Railway tidak ada server AI lokal yang jalan di port 8080,
+	// kita beri respons dummy (pura-pura) agar tidak error saat didemo.
+	return "Halo! Saya adalah FikomBot (Bot AI Simulasi). \nSaat ini koneksi ke engine AI pusat sedang dinonaktifkan untuk demo server cloud.\n\nNamun, pastikan kamu mencoba fitur integrasi *Google Drive* kami yang berjalan 100% sempurna di cloud!"
 }
