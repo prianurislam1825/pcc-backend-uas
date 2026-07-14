@@ -3,6 +3,7 @@ package wa
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -147,10 +148,12 @@ func KonekWa(db *gorm.DB) {
 		}
 		for evt := range qrChan {
 			if evt.Event == "code" {
-				// Render the QR code here
-				qrterminal.GenerateHalfBlock(evt.Code, qrterminal.L, os.Stdout)
-				// or just manually `echo 2@... | qrencode -t ansiutf8` in a terminal
-				fmt.Println("QR code:", evt.Code)
+				// Bikin link gambar biar user gampang scan
+				encodedCode := url.QueryEscape(evt.Code)
+				fmt.Println("\n=========================================================================")
+				fmt.Println("👉 KLIK LINK INI UNTUK BUKA GAMBAR QR CODE (Lalu Scan Pakai WhatsApp):")
+				fmt.Printf("https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=%s\n", encodedCode)
+				fmt.Println("=========================================================================\n")
 			} else {
 				fmt.Println("Login event:", evt.Event)
 			}
