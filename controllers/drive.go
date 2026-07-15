@@ -71,7 +71,7 @@ func DriveUpload(c *gin.Context) {
 
 	// Kirim request ke Google Apps Script
 	res, err := http.Post(
-		"https://script.google.com/macros/s/AKfycbzLMAEU44QS0dYjUD149KEw5bmsIntwe6jGML6jq7eht38FsFpzaciPhqZxrzg1EVmB/exec",
+		"https://script.google.com/macros/s/AKfycbznE4U43zLW5u4_VlFLwnWtz_Oj0NyPLCOztCK82vSOnVuftcKSiUvz1b8icUyd12k/exec",
 		"application/json; charset=UTF-8",
 		requestBody,
 	)
@@ -166,7 +166,7 @@ func DriveUnduh(c *gin.Context) {
 
 	// Request ke Google Apps Script
 	res, err := http.Get(
-		"https://script.google.com/macros/s/AKfycbzLMAEU44QS0dYjUD149KEw5bmsIntwe6jGML6jq7eht38FsFpzaciPhqZxrzg1EVmB/exec?id=" + id,
+		"https://script.google.com/macros/s/AKfycbznE4U43zLW5u4_VlFLwnWtz_Oj0NyPLCOztCK82vSOnVuftcKSiUvz1b8icUyd12k/exec?id=" + id,
 	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
