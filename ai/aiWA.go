@@ -1,47 +1,92 @@
 package ai
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"strings"
-	"sync"
-
-	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/option"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
-
-var client openai.Client
 
 var aiReady bool
 
-var userHistories = make(map[string][]openai.ChatCompletionMessageParamUnion)
-
-var mu sync.Mutex
-
 func InitAi() {
-	client = openai.NewClient(
-		option.WithBaseURL("http://localhost:8080/v1/"),
-		option.WithAPIKey("saksake-karena-gak-butuh-api-key"),
-	)
-	aiReady = true
+	if os.Getenv("GEMINI_API_KEY") != "" {
+		aiReady = true
+		fmt.Println("Gemini AI Engine berhasil diinisialisasi.")
+	} else {
+		fmt.Println("Warning: GEMINI_API_KEY belum di-set!")
+	}
+}
 
-	fmt.Println("AI Engine berhasil diinisialisasi.")
+type GeminiContent struct {
+	Parts []GeminiPart `json:"parts"`
+	Role  string       `json:"role,omitempty"`
+}
+
+type GeminiPart struct {
+	Text string `json:"text"`
+}
+
+type GeminiRequest struct {
+	Contents          []GeminiContent `json:"contents"`
+	SystemInstruction *GeminiContent  `json:"systemInstruction,omitempty"`
+}
+
+type GeminiResponse struct {
+	Candidates []struct {
+		Content struct {
+			Parts []GeminiPart `json:"parts"`
+		} `json:"content"`
+	} `json:"candidates"`
 }
 
 func TanyaAi(userID string, userInput string) string {
-	input := strings.ToLower(userInput)
-
-	if strings.Contains(input, "siapa") {
-		return "Halo! Saya adalah FikomBot, asisten virtual resmi Fakultas Ilmu Komputer UDB Surakarta. Ada yang bisa saya bantu terkait informasi akademik?"
-	} else if strings.Contains(input, "halo") || strings.Contains(input, "hai") {
-		return "Halo juga! Selamat datang di layanan FikomBot. Silakan tanyakan apa saja."
-	} else if strings.Contains(input, "bantu") {
-		return "Tentu! Saya bisa membantu kamu menjawab pertanyaan seputar jadwal kuliah, KRS, atau informasi pendaftaran. Apa yang ingin kamu tanyakan?"
-	} else if strings.Contains(input, "kuliah") {
-		return "Untuk informasi perkuliahan Fakultas Ilmu Komputer UDB, kamu bisa mengecek jadwal terupdate di website resmi kampus atau menghubungi BAAK."
-	} else if strings.Contains(input, "terima kasih") || strings.Contains(input, "makasih") {
-		return "Sama-sama! Senang bisa membantu. Jangan ragu untuk bertanya lagi jika butuh bantuan."
+	apiKey := os.Getenv("GEMINI_API_KEY")
+	if apiKey == "" {
+		return "Mohon maaf, API Key AI belum diatur di server cloud."
 	}
 
-	// Default respon jika keyword tidak ada
-	return "Maaf, saya tidak mengerti pertanyaanmu. Sebagai asisten demo FikomBot, saya hanya dapat merespons beberapa pertanyaan umum saat ini."
+	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey
+
+	reqBody := GeminiRequest{
+		SystemInstruction: &GeminiContent{
+			Parts: []GeminiPart{{Text: "Anda adalah FikomBot, asisten virtual resmi Fakultas Ilmu Komputer UDB Surakarta."}},
+		},
+		Contents: []GeminiContent{
+			{
+				Role:  "user",
+				Parts: []GeminiPart{{Text: userInput}},
+			},
+		},
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return "Error saat menyusun data AI."
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "Mohon maaf, terjadi gangguan saat terhubung ke Gemini AI."
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Sprintf("Mohon maaf, respon error dari Gemini AI (Status: %d).", resp.StatusCode)
+	}
+
+	bodyBytes, _ := ioutil.ReadAll(resp.Body)
+	var geminiResp GeminiResponse
+	err = json.Unmarshal(bodyBytes, &geminiResp)
+	if err != nil {
+		return "Gagal memproses jawaban dari AI."
+	}
+
+	if len(geminiResp.Candidates) > 0 && len(geminiResp.Candidates[0].Content.Parts) > 0 {
+		return geminiResp.Candidates[0].Content.Parts[0].Text
+	}
+
+	return "Maaf, AI tidak memberikan respons."
 }
