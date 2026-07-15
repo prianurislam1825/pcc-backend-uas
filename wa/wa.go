@@ -43,7 +43,6 @@ func eventHandler(evt interface{}) {
 		fmt.Printf("apakah broadcast =", v.Info.IsIncomingBroadcast())
 
 		if !v.Info.IsFromMe &&
-			v.Info.MessageSource.Chat.Server == "lid" &&
 			!v.Info.IsGroup &&
 			!v.Info.IsIncomingBroadcast() {
 			fmt.Println("PENGIRIM = ", v.Info.Sender.User)
@@ -180,7 +179,7 @@ func KonekWa(db *gorm.DB) {
 func kirimPesanText(JIDPenerima types.JID, text string) {
 	clientWa.SendMessage(
 		context.Background(),
-		JIDPenerima,
+		JIDPenerima.ToNonAD(),
 		&waE2E.Message{
 			Conversation: proto.String(text),
 		},
